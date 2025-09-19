@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>스터디 플랜</title>
+    <style>
+      header {
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+        margin-top: 50px;
+        border-bottom: 5px solid rgb(138, 134, 134);
+        max-width: 1000px;
+        width: 100%;
+      }
+
+      #planInput {
+        width: 700px;
+        height: 50px;
+        display: block;
+        margin: 0 auto;
+        margin-top: 10px;
+        border: 1px solid green;
+        border-radius: 5px;
+      }
+
+      #list {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 250px;
+      }
+      h3 {
+        text-decoration: underline;
+        text-decoration-color: green;
+      }
+      #ToDo,
+      #Done {
+        width: 300px;
+        min-height: 300px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .plan-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .complet-btn {
+        background-color: green;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>UMC Study Plan</h1>
+    </header>
+    <input
+      id="planInput"
+      type="text"
+      placeholder="스터디 계획을 작성해보세요!"
+    />
+
+    <section id="list">
+      <section id="ToDo">
+        <h3>해야 할 일</h3>
+      </section>
+
+      <section id="Done">
+        <h3>해낸 일</h3>
+      </section>
+    </section>
+    <script>
+      const planInput = document.getElementById("planInput");
+      const todoSection = document.getElementById("ToDo");
+      const doneSection = document.getElementById("Done");
+
+      planInput.addEventListener("keyup", (event) => {
+        if (event.key === "Enter") {
+          const newPlanText = planInput.value.trim();
+          if (newPlanText === "") return;
+
+          const existingPlans = todoSection.querySelectorAll("p");
+          for (let plan of existingPlans) {
+            if (plan.textContent === newPlanText) {
+              planInput.value = "";
+              return;
+            }
+          }
+
+          const newPlanItem = document.createElement("div");
+          newPlanItem.classList.add("plan-item");
+
+          const planText = document.createElement("p");
+          planText.textContent = newPlanText;
+
+          const completeBtn = document.createElement("button");
+          completeBtn.textContent = "완료";
+          completeBtn.classList.add("complete-btn");
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "삭제";
+          deleteBtn.classList.add("delete-btn");
+
+          completeBtn.addEventListener("click", () => {
+            todoSection.removeChild(newPlanItem);
+            doneSection.appendChild(newPlanItem);
+            completeBtn.remove();
+            newPlanItem.appendChild(deleteBtn);
+          });
+
+          deleteBtn.addEventListener("click", () => {
+            doneSection.removeChild(newPlanItem);
+            deleteBtn.remove();
+          });
+
+          newPlanItem.appendChild(planText);
+          newPlanItem.appendChild(completeBtn);
+          todoSection.appendChild(newPlanItem);
+
+          planInput.value = "";
+        }
+      });
+    </script>
+  </body>
+</html>
