@@ -32,7 +32,7 @@ const MovieDetailPage = () => {
     const fetchData = async () => {
       setIsloading(true);
       try {
-        const moviefetch = fetch(
+        const fetchMovie = fetch(
           `https://api.themoviedb.org/3/movie/${movieId}?language=ko-KR`,
           {
             headers: {
@@ -41,7 +41,7 @@ const MovieDetailPage = () => {
             },
           }
         );
-        const castfetch = fetch(
+        const fetchCast = fetch(
           `https://api.themoviedb.org/3/movie/${movieId}/credits?language=ko-KR`,
           {
             headers: {
@@ -52,8 +52,8 @@ const MovieDetailPage = () => {
         );
 
         const [movieData, castData] = await Promise.all([
-          moviefetch.then((res) => res.json()),
-          castfetch.then((res) => res.json()),
+          fetchMovie.then((res) => res.json()),
+          fetchCast.then((res) => res.json()),
         ]);
 
         setMovie(movieData);
@@ -84,9 +84,10 @@ const MovieDetailPage = () => {
         />
         <div>
           <h1 className="text-3xl font-bold mb-4">{movie?.title}</h1>
-          <p className="text-gray-600 mb-2">러닝타임: {movie?.runtime}분</p>
+          <p className="text-gray-600 mb-2">🏃🏻러닝타임: {movie?.runtime}분</p>
           <p className="text-yellow-500 font-bold mb-2">
-            평점: {movie?.vote_average.toFixed(1)} / 10 ({movie?.vote_count}명)
+            ⭐️평점: {movie?.vote_average.toFixed(1)} / 10 ({movie?.vote_count}
+            명)
           </p>
           <p className="text-gray-700 leading-relaxed">{movie?.overview}</p>
         </div>

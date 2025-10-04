@@ -1,21 +1,24 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import type { Movie } from "../types/movie";
-import PageButton from "../components/PageButton";
 import { LoadingIcon } from "../components/LoadingIcon";
 import { ErrorText } from "../components/ErrorText";
-const NowStreamingPage = () => {
+import PageButton from "../components/PageButton";
+
+const MoviePage = () => {
   const navigate = useNavigate();
+  const { category } = useParams();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isloading, setIsloading] = useState(false);
   const [iserror, setIserror] = useState(false);
   const [page, setPage] = useState(1);
+
   useEffect(() => {
     const fetchMovies = async () => {
       setIsloading(true);
       try {
         const response = await fetch(
-          `https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=${page}`,
+          `https://api.themoviedb.org/3/movie/${category}?language=ko-KR&page=${page}`,
           {
             headers: {
               Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
@@ -23,37 +26,34 @@ const NowStreamingPage = () => {
             },
           }
         );
-        console.log("state", response.status);
-        const result = await response.json();
 
+        if (!response.ok) throw new Error();
+        const result = await response.json();
         setMovies(result.results);
-        setMovies(result.results);
-        setIsloading(false);
       } catch {
         setIserror(true);
       } finally {
         setIsloading(false);
       }
     };
+
     fetchMovies();
-  }, [page]);
-  if (isloading) {
-    return <LoadingIcon />;
-  }
-  if (iserror) {
-    return <ErrorText />;
-  }
+  }, [category, page]);
+
+  if (isloading) return <LoadingIcon />;
+  if (iserror) return <ErrorText />;
+
   return (
     <div>
       <div className="flex justify-center mt-6">
         <PageButton page={page} pageChange={setPage} />
       </div>
       <div className="grid grid-cols-6 gap-4 py-10 px-24">
-        {movies.map((movie) => (
+        {movies?.map((movie) => (
           <div
             key={movie.id}
             className="relative bg-white rounded-3xl shadow overflow-hidden group"
-            onClick={() => navigate(`/now-streaming/${movie.id}`)}
+            onClick={() => navigate(`/movies/${category}/${movie.id}`)}
           >
             <img
               src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
@@ -71,4 +71,4 @@ const NowStreamingPage = () => {
   );
 };
 
-export default NowStreamingPage;
+export default MoviePage;
