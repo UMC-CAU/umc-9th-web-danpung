@@ -1,45 +1,12 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import type { Movie } from "../types/movie";
+import { useNavigate } from "react-router-dom";
 import { LoadingIcon } from "../components/LoadingIcon";
 import { ErrorText } from "../components/ErrorText";
 import PageButton from "../components/PageButton";
+import useMovies from "../hooks/useMovies";
 
 const MoviePage = () => {
   const navigate = useNavigate();
-  const { category } = useParams();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [isloading, setIsloading] = useState(false);
-  const [iserror, setIserror] = useState(false);
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setIsloading(true);
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/movie/${category}?language=ko-KR&page=${page}`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_KEY}`,
-              accept: "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) throw new Error();
-        const result = await response.json();
-        setMovies(result.results);
-      } catch {
-        setIserror(true);
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    fetchMovies();
-  }, [category, page]);
-
+  const { category, movies, isloading, iserror, page, setPage } = useMovies();
   if (isloading) return <LoadingIcon />;
   if (iserror) return <ErrorText />;
 
