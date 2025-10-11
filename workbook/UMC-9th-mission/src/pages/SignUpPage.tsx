@@ -1,93 +1,111 @@
 import { useState } from "react";
-import useForm from "../hooks/useForm";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import profileImg from "../assets/profile.webp";
+import profile from "../assets/profile.webp";
+import { signUp } from "../api/auth";
+import GoogleButton from "../components/GoogleButton";
+const schema = z.object({
+  email: z.string().email({ message: "올바른 이메일 형식이 아닙니다." }),
+  password: z.string().min(6, { message: "비밀번호는 6자 이상이어야 합니다." }),
+  confirmPassword: z
+    .string()
+    .min(1, { message: "비밀번호를 다시 입력해주세요." }),
+  nickName: z.string().min(1, { message: "닉네임을 입력해주세요." }),
+  bio: z.string().optional(),
+  avatar: z.string().optional(),
+});
+
+type FormFields = z.infer<typeof schema>;
 
 const SignUpPage = () => {
-  const {
-    inputs,
-    okid,
-    okps,
-    islogin,
-    handleChange,
-    handlePassword,
-    showPassword,
-  } = useForm();
-
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [matchError, setMatchError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    mode: "onChange",
+  });
 
-    if (step === 1) {
-      if (okid || !inputs.ID) {
-        alert("올바른 이메일을 입력해주세요.");
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (okps || !inputs.password) {
-        alert("비밀번호를 6자리 이상 입력해주세요.");
-        return;
-      }
-      if (inputs.password !== confirmPassword) {
-        setMatchError(true);
-        return;
-      }
-      setStep(3);
-    } else if (step === 3) {
-      if (!inputs.nickName) return;
-      alert(`회원가입 완료!\n이메일: ${inputs.ID}\n닉네임: ${inputs.nickName}`);
+  const email = watch("email");
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const nickName = watch("nickName");
+  const matchError = confirmPassword && password !== confirmPassword;
+
+  const onSubmit = async (formData: FormFields) => {
+    try {
+      const result = await signUp({
+        name: formData.nickName,
+        email: formData.email,
+        password: formData.password,
+        bio: formData.bio,
+        avatar: formData.avatar,
+      });
+      console.log("회원가입 성공:,", result);
+      alert("회원가입 성공");
       navigate("/");
+    } catch (error: any) {
+      console.log("회원가입 실패:", error.response?.data || error.message);
+      alert("회원가입 실패");
     }
   };
 
-  const handleConfirmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setConfirmPassword(value);
-    setMatchError(value.length > 0 && value !== inputs.password);
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (step === 1 && !errors.email && email) setStep(2);
+    else if (
+      step === 2 &&
+      !errors.password &&
+      !errors.confirmPassword &&
+      !matchError &&
+      password
+    )
+      setStep(3);
   };
 
   return (
     <div className="flex justify-center min-h-screen items-center bg-gray-50">
       <form
-        onSubmit={handleNext}
+        onSubmit={step === 3 ? handleSubmit(onSubmit) : handleNext}
         className="relative flex flex-col gap-4 items-center w-80 p-6 bg-white rounded-2xl shadow-md"
       >
         <div className="flex items-center justify-center w-full">
           <button
             type="button"
-            onClick={() => (step === 1 ? navigate("/") : setStep(1))}
+            onClick={() => (step === 1 ? navigate("/") : setStep(step - 1))}
             className="absolute left-4 font-bold text-xl"
           >
             &lt;
           </button>
           <h1 className="font-bold text-2xl">회원가입</h1>
         </div>
+
         {step === 1 && (
           <div className="flex flex-col items-center">
             <input
-              name="ID"
-              value={inputs.ID || ""}
-              onChange={handleChange}
+              {...register("email")}
               placeholder="이메일을 입력하세요"
-              className="w-60 border rounded border-gray-500 box-border px-2 py-2 mb-3 focus:border-green-500 outline-none"
+              className="w-60 border rounded border-gray-400 box-border px-2 py-2 mb-3 focus:border-green-500 outline-none"
             />
-            {okid && (
-              <p className="text-red-500 text-sm">
-                올바른 이메일 형식을 입력해주세요.
-              </p>
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
             )}
             <button
               type="submit"
-              disabled={okid || !inputs.ID}
-              className={`border rounded border-none w-60 h-8 text-white 
-    ${okid || !inputs.ID ? "bg-gray-400" : "bg-green-500 hover:bg-green-700"}
-  `}
+              className={`border rounded w-60 h-8 text-white transition ${
+                !email || errors.email
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-700"
+              }`}
             >
               다음
             </button>
@@ -96,22 +114,20 @@ const SignUpPage = () => {
 
         {step === 2 && (
           <>
-            <div className="flex justify-center text-gray-700 text-sm w-60 text-left">
-              <span className="font-semibold text-gray-500">✉️{inputs.ID}</span>
-            </div>
+            <span className="font-semibold text-gray-500 text-sm">
+              ✉️ {email}
+            </span>
 
             <div className="relative w-60">
               <input
-                name="password"
+                {...register("password")}
                 type={showPassword ? "text" : "password"}
-                value={inputs.password || ""}
-                onChange={handleChange}
                 placeholder="비밀번호를 입력하세요"
-                className="w-full border rounded border-gray-500 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
+                className="w-full border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
               />
               <button
                 type="button"
-                onClick={handlePassword}
+                onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
               >
                 {showPassword ? "🕶️" : "👓"}
@@ -120,11 +136,10 @@ const SignUpPage = () => {
 
             <div className="relative w-60">
               <input
+                {...register("confirmPassword")}
                 type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={handleConfirmChange}
                 placeholder="비밀번호를 다시 입력하세요"
-                className="w-full border rounded border-gray-500 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
+                className="w-full border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
               />
               <button
                 type="button"
@@ -135,9 +150,12 @@ const SignUpPage = () => {
               </button>
             </div>
 
-            {okps && (
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
+            {errors.confirmPassword && (
               <p className="text-red-500 text-sm">
-                비밀번호는 6자리 이상이어야 합니다.
+                {errors.confirmPassword.message}
               </p>
             )}
             {matchError && (
@@ -148,49 +166,49 @@ const SignUpPage = () => {
 
             <button
               type="submit"
-              disabled={!islogin || matchError}
-              className={`border rounded w-60 h-8 text-white
-    ${
-      !islogin || matchError
-        ? "bg-gray-500 cursor-not-allowed"
-        : "bg-green-500 hover:bg-green-700"
-    }
-  `}
+              className={`border rounded w-60 h-8 text-white transition ${
+                errors.password ||
+                errors.confirmPassword ||
+                matchError ||
+                !password
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-700"
+              }`}
             >
               다음
             </button>
           </>
         )}
+
         {step === 3 && (
           <>
             <img
-              src={profileImg}
-              alt="프로필 이미지"
-              className="size-40 rounded-full mb-3"
+              src={profile}
+              alt="프로필"
+              className="w-20 h-20 rounded-full object-cover mb-2"
             />
             <input
-              type="text"
-              name="nickName"
-              value={inputs.nickName || ""}
-              onChange={handleChange}
+              {...register("nickName")}
               placeholder="닉네임을 입력하세요"
-              className="w-60 border rounded border-gray-500 box-border px-2 py-2 focus:border-green-500 outline-none pr-10 "
+              className="w-60 border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none"
             />
+            {errors.nickName && (
+              <p className="text-red-500 text-sm">{errors.nickName.message}</p>
+            )}
+
             <button
               type="submit"
-              disabled={!inputs.nickName}
-              className={`border rounded w-60 h-8 text-white
-    ${
-      !inputs.nickName
-        ? "bg-gray-500 cursor-not-allowed"
-        : "bg-green-500 hover:bg-green-700"
-    }
-  `}
+              className={`border rounded w-60 h-8 text-white transition ${
+                !nickName || errors.nickName
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-700"
+              }`}
             >
               회원가입 완료
             </button>
           </>
         )}
+        <GoogleButton />
       </form>
     </div>
   );

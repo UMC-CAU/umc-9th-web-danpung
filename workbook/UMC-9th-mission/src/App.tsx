@@ -1,9 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import RootLayout from "./layout/rootLayout";
+import RootLayout from "./layout/RootLayout";
 import ErrorPage from "./pages/ErrorPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import GoogleRedirectPage from "./pages/GoogleRedirectPage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignUpPage /> },
+      {
+        path: "v1/auth/google/callback",
+        element: <GoogleRedirectPage />,
+      },
     ],
   },
 ]);
