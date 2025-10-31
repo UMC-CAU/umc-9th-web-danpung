@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { login } from "../api/auth";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useToken } from "../Context/TokenContext";
 import GoogleButton from "../components/GoogleButton";
+
 const schema = z.object({
   email: z.string().email({ message: "올바른 이메일 형식이 아닙니다." }),
   password: z
@@ -17,8 +18,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const LoginPage = () => {
-  const [setAccessToken] = useLocalStorage("accessToken");
-  const [setRefreshToken] = useLocalStorage("refreshToken");
+  const { login: contextLogin } = useToken();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -34,14 +34,11 @@ const LoginPage = () => {
   const onSubmit = async (data: FormData) => {
     try {
       const result = await login(data.email, data.password);
-      setAccessToken(result.data.accessToken);
-      setRefreshToken(result.data.refreshToken);
-
-      console.log("로그인 성공:", result);
+      contextLogin(result.data.accessToken);
+      localStorage.setItem("refreshToken", result.data.refreshToken);
       alert("로그인 성공");
-      navigate("/");
+      window.location.href = "/";
     } catch (error: any) {
-      console.log("로그인 실패", error.response?.data || error.message);
       alert("로그인 실패");
     }
   };

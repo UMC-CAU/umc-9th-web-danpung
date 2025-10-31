@@ -1,8 +1,7 @@
 import Logo from "../assets/googleLogo.png";
 const GoogleButton = () => {
   const handleGoogleButton = () => {
-    window.location.href =
-      "https://umc-web.kyeoungwoon.kr/v1/auth/google/login";
+    window.location.href = "http://localhost:8000/v1/auth/google/login";
   };
   return (
     <button

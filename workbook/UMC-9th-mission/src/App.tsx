@@ -5,6 +5,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import GoogleRedirectPage from "./pages/GoogleRedirectPage";
+import UsermePage from "./pages/UsermePage";
+import ProtectedRoute from "./components/ProtectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -17,6 +19,14 @@ const router = createBrowserRouter([
       {
         path: "v1/auth/google/callback",
         element: <GoogleRedirectPage />,
+      },
+      {
+        path: "v1/users/me",
+        element: (
+          <ProtectedRoute>
+            <UsermePage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
