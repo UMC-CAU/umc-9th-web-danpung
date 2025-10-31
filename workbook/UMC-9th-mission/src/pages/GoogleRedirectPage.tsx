@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from "react"; //구글 로그인
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToken } from "../Context/TokenContext";
 

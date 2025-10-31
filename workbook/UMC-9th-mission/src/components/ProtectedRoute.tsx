@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom"; //보호 루트
 import type { ReactNode } from "react";
 
 interface ProtectedRouteProps {

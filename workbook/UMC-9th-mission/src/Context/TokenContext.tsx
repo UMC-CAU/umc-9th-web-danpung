@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react"; //토큰 여부
 
 interface TokenContextType {
   token: string | null;
