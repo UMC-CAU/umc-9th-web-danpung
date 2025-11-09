@@ -1,8 +1,17 @@
-import { useToken } from "../Context/TokenContext"; //냅바
+import { useToken } from "../Context/TokenContext";
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { Search } from "lucide-react";
 
-const Navbar = () => {
-  const { token, logout } = useToken();
+interface NavbarProps {
+  sidebarOpen: boolean;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Navbar = ({ sidebarOpen, searchTerm, setSearchTerm }: NavbarProps) => {
+  const { token, logout, userMe } = useToken();
+  const [showSearch, setShowSearch] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -11,7 +20,10 @@ const Navbar = () => {
 
   const links = token
     ? [
-        { path: "/v1/users/me", label: "내 정보" },
+        {
+          path: "/v1/users/me",
+          label: userMe ? `${userMe}님 환영합니다` : "내 정보",
+        },
         { path: "#", label: "로그아웃", onClick: handleLogout },
       ]
     : [
@@ -20,12 +32,32 @@ const Navbar = () => {
       ];
 
   return (
-    <nav className="flex justify-between items-center mt-10 px-20 font-bold">
+    <nav
+      className={`fixed top-0 left-0 right-0 h-16 bg-white shadow-md flex justify-between items-center px-8 font-bold z-50 transition-all duration-300 ${
+        sidebarOpen ? "md:ml-64" : "md:ml-0"
+      }`}
+    >
       <NavLink to="/" className="text-black text-lg">
         돌돌돌돌 LP판
       </NavLink>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
+        {showSearch && (
+          <input
+            type="text"
+            placeholder="검색어 입력..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border p-1 rounded-lg focus:outline-none focus:border-yellow-500"
+          />
+        )}
+        <button
+          onClick={() => setShowSearch((prev) => !prev)}
+          className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white shadow-md hover:scale-110"
+        >
+          <Search size={20} />
+        </button>
+
         {links.map((link) =>
           link.onClick ? (
             <span

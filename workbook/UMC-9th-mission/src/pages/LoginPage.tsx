@@ -1,7 +1,7 @@
 import { useState } from "react"; //로그인 페이지
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { z } from "zod";
 import { login } from "../api/auth";
 import { useToken } from "../Context/TokenContext";
@@ -21,6 +21,8 @@ const LoginPage = () => {
   const { login: contextLogin } = useToken();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: Location })?.from?.pathname || "/";
 
   const {
     register,
@@ -37,7 +39,7 @@ const LoginPage = () => {
       contextLogin(result.data.accessToken);
       localStorage.setItem("refreshToken", result.data.refreshToken);
       alert("로그인 성공");
-      window.location.href = "/";
+      navigate(from, { replace: true });
     } catch (error: any) {
       alert("로그인 실패");
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; //내정보 페이지
 import axiosInstance from "../api/axiosInstance";
 
 interface UserData {

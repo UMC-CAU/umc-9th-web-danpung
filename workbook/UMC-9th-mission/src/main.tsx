@@ -5,7 +5,8 @@ import "./index.css";
 import App from "./App";
 import { TokenProvider } from "./Context/TokenContext";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
+import InfinitePostsJsonPlaceholder from "./components/InfinitePostsJsonPlaceholder";
+import InfinitePostsAutoJsonPlaceholder from "./components/InfiniteAuto";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
@@ -15,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
         <TokenProvider>
           <App />
         </TokenProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </>
     </QueryClientProvider>
   </StrictMode>
