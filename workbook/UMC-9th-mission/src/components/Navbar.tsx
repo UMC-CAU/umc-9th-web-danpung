@@ -2,6 +2,7 @@ import { useToken } from "../Context/TokenContext";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { useLogout } from "../components/LogoutMutation";
 
 interface NavbarProps {
   sidebarOpen: boolean;
@@ -10,21 +11,22 @@ interface NavbarProps {
 }
 
 const Navbar = ({ sidebarOpen, searchTerm, setSearchTerm }: NavbarProps) => {
-  const { token, logout, userMe } = useToken();
+  const { token, userMe } = useToken();
   const [showSearch, setShowSearch] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = "/";
-  };
+  const logoutMutation = useLogout();
 
   const links = token
     ? [
         {
           path: "/v1/users/me",
-          label: userMe ? `${userMe}님 환영합니다` : "내 정보",
+          label: userMe ? `${userMe.name}님 환영합니다` : "내 정보",
         },
-        { path: "#", label: "로그아웃", onClick: handleLogout },
+        {
+          path: "#",
+          label: "로그아웃",
+          onClick: () => logoutMutation.mutate(),
+        },
       ]
     : [
         { path: "/login", label: "로그인" },

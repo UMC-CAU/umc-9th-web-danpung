@@ -1,45 +1,74 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import api from "../api/axiosInstance";
 import SortButtons from "./SortButtons";
 import dayjs from "dayjs";
-
-const PAGE_SIZE = 5;
-
-interface IComment {
-  id: number;
-  content: string;
-  createdAt: string;
-  author: {
-    id: number;
-    name: string;
-    avatar?: string;
-  };
-}
-
-async function fetchComments({
-  lpId,
-  pageParam = 0,
-  order = "desc",
-}: {
-  lpId: number;
-  pageParam?: number;
-  order?: "asc" | "desc";
-}) {
-  const res = await api.get(`/v1/lps/${lpId}/comments`, {
-    params: { cursor: pageParam, limit: PAGE_SIZE, order },
-  });
-  if (!res.data.status) throw new Error("댓글 가져오기 실패");
-
-  return {
-    data: res.data.data.data as IComment[],
-    nextCursor: res.data.data.nextCursor,
-    hasNext: res.data.data.hasNext,
-  };
-}
+import { useToken } from "../Context/TokenContext";
+import {
+  fetchComments,
+  postComment,
+  deleteComment,
+  editComment,
+} from "../api/LpApi";
+import { Edit, Trash2, MoreVertical } from "lucide-react";
 
 export default function InfiniteComments({ lpId }: { lpId: number }) {
+  const { userMe } = useToken();
+  const [showmenu, setShowmenu] = useState<number | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const qc = useQueryClient();
   const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [commentInput, setCommentInput] = useState("");
+
+  const toggleMenu = (commentid: number) => {
+    if (showmenu === commentid) {
+      setShowmenu(null);
+      setEditingCommentId(null);
+    } else {
+      setShowmenu(commentid);
+    }
+  };
+
+  const handleDeleteComment = useMutation({
+    mutationKey: ["deleteComment"],
+    mutationFn: deleteComment,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
+    },
+    onError: () => {
+      alert("댓글 삭제 실패");
+    },
+  });
+
+  const handleEditComment = useMutation({
+    mutationKey: ["editComment"],
+    mutationFn: editComment,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
+      setEditingCommentId(null);
+      setShowmenu(null);
+    },
+    onError: () => {
+      alert("댓글 수정 실패");
+    },
+  });
+
+  const createComment = useMutation({
+    mutationKey: ["createComment"],
+    mutationFn: postComment,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
+      setCommentInput("");
+    },
+    onError: () => {
+      alert("댓글 작성 실패");
+      setCommentInput("");
+    },
+  });
 
   const {
     data,
@@ -76,7 +105,7 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
   if (isError)
     return (
       <div className="text-center text-red-500">
-        댓글 로드 실패 😢
+        댓글 로드 실패
         <button
           onClick={() => refetch()}
           className="mt-2 px-3 py-1 bg-yellow-400 text-white rounded"
@@ -91,53 +120,138 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
   return (
     <div className="mt-6">
       <SortButtons sort={order} setSort={setOrder} />
+
       <div className="flex gap-2 mb-2">
         <input
           type="text"
           placeholder="댓글을 입력하세요."
           className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          value={commentInput}
+          onChange={(e) => setCommentInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && commentInput.trim()) {
+              createComment.mutate({
+                lpid: lpId,
+                content: commentInput.trim(),
+              });
+            }
+          }}
         />
-        <button className="px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition">
-          등록
+        <button
+          disabled={createComment.isPending}
+          className={`px-4 py-2 rounded-lg text-white transition ${
+            createComment.isPending
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-yellow-400 hover:bg-yellow-500"
+          }`}
+          onClick={() => {
+            if (!commentInput.trim()) return;
+            createComment.mutate({ lpid: lpId, content: commentInput.trim() });
+          }}
+        >
+          {createComment.isPending ? "등록 중..." : "등록"}
         </button>
       </div>
 
       <div className="space-y-4">
-        {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="border-b pb-3 animate-pulse">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full" />
-                    <div className="w-24 h-4 bg-gray-300 rounded" />
-                  </div>
-                  <div className="w-16 h-3 bg-gray-300 rounded" />
-                </div>
-                <div className="mt-2 w-full h-4 bg-gray-300 rounded" />
-                <div className="mt-1 w-5/6 h-4 bg-gray-300 rounded" />
+        {allComments.map((c) => (
+          <div key={c.id} className="border-b pb-3">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <img
+                  src={
+                    c.author.avatar || "https://placehold.co/40x40?text=No+Img"
+                  }
+                  alt={c.author.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <p className="font-medium">{c.author.name}</p>
               </div>
-            ))
-          : allComments.map((c) => (
-              <div key={c.id} className="border-b pb-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={
-                        c.author.avatar ||
-                        "https://placehold.co/40x40?text=No+Img"
-                      }
-                      alt={c.author.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <p className="font-medium">{c.author.name}</p>
-                  </div>
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-400">
                     {dayjs(c.createdAt).fromNow()}
                   </span>
+                  {userMe?.id === c.author.id && (
+                    <button
+                      onClick={() => toggleMenu(c.id)}
+                      className="p-1 text-yellow-500 hover:text-gray-700 cursor-pointer"
+                    >
+                      <MoreVertical size={20} />
+                    </button>
+                  )}
                 </div>
-                <p className="text-gray-700 mt-1">{c.content}</p>
+                {showmenu === c.id && (
+                  <div className="mt-1 flex gap-2">
+                    <button
+                      className="text-sm text-yellow-500 cursor-pointer"
+                      onClick={() => {
+                        setEditingCommentId(c.id);
+                        setEditingContent(c.content);
+                      }}
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      className="text-sm text-red-500 cursor-pointer"
+                      onClick={() => {
+                        if (confirm("댓글을 삭제하시겠습니까?"))
+                          handleDeleteComment.mutate({
+                            lpid: lpId,
+                            commentid: c.id,
+                          });
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                )}
               </div>
-            ))}
+            </div>
+
+            {editingCommentId === c.id && showmenu ? (
+              <div className="flex gap-2 mt-1">
+                <input
+                  type="text"
+                  value={editingContent}
+                  onChange={(e) => setEditingContent(e.target.value)}
+                  className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && editingContent.trim()) {
+                      handleEditComment.mutate({
+                        lpid: lpId,
+                        commentid: c.id,
+                        content: editingContent.trim(),
+                      });
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (editingContent.trim()) {
+                      handleEditComment.mutate({
+                        lpid: lpId,
+                        commentid: c.id,
+                        content: editingContent.trim(),
+                      });
+                    }
+                  }}
+                  className="text-sm text-yellow-500 cursor-pointer"
+                >
+                  저장
+                </button>
+                <button
+                  onClick={() => setEditingCommentId(null)}
+                  className="text-sm text-red-500 cursor-pointer"
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <p className="text-gray-700 mt-2">{c.content}</p>
+            )}
+          </div>
+        ))}
       </div>
 
       <div ref={sentinelRef} className="h-4" />

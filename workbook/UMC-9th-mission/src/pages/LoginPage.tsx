@@ -6,7 +6,7 @@ import { z } from "zod";
 import { login } from "../api/auth";
 import { useToken } from "../Context/TokenContext";
 import GoogleButton from "../components/GoogleButton";
-
+import { useMutation } from "@tanstack/react-query";
 const schema = z.object({
   email: z.string().email({ message: "올바른 이메일 형식이 아닙니다." }),
   password: z
@@ -27,28 +27,27 @@ const LoginPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     mode: "onChange",
   });
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      const result = await login(data.email, data.password);
-      contextLogin(result.data.accessToken);
-      localStorage.setItem("refreshToken", result.data.refreshToken);
-      alert("로그인 성공");
+  const loginMutation = useMutation({
+    mutationFn: ({ email, password }: FormData) => login(email, password),
+    onSuccess: (data) => {
+      contextLogin(data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
       navigate(from, { replace: true });
-    } catch (error: any) {
+    },
+    onError: () => {
       alert("로그인 실패");
-    }
-  };
+    },
+  });
 
   return (
     <div className="flex justify-center min-h-screen items-center bg-gray-50">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit((formData) => loginMutation.mutate(formData))}
         className="relative flex flex-col gap-4 items-center w-80 p-6 bg-white rounded-2xl shadow-md"
       >
         <div className="flex items-center justify-center w-full">
@@ -91,15 +90,15 @@ const LoginPage = () => {
         )}
 
         <button
-          disabled={!isValid || isSubmitting}
+          disabled={!isValid || loginMutation.isPending}
           type="submit"
           className={`border rounded w-60 h-8 text-white transition ${
-            !isValid || isSubmitting
+            !isValid || loginMutation.isPending
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-green-500 hover:bg-green-700"
           }`}
         >
-          {isSubmitting ? "로그인 중..." : "로그인"}
+          {loginMutation.isPending ? "로그인 중..." : "로그인"}
         </button>
 
         <hr className="w-full mt-2" />

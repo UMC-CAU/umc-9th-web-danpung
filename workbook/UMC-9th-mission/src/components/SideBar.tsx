@@ -4,10 +4,22 @@ import { useNavigate } from "react-router-dom";
 interface SideBarProps {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
+  isDelete: boolean;
+  setIsDelete: (value: boolean) => void;
 }
 
-const SideBar = ({ isOpen, setIsOpen }: SideBarProps) => {
+const SideBar = ({
+  isOpen,
+  setIsOpen,
+  isDelete,
+  setIsDelete,
+}: SideBarProps) => {
   const navigate = useNavigate();
+
+  const handleDelete = () => {
+    setIsDelete(!isDelete);
+  };
+
   const [isMdUp, setIsMdUp] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
@@ -59,6 +71,9 @@ const SideBar = ({ isOpen, setIsOpen }: SideBarProps) => {
           >
             내 정보
           </li>
+          <ul className="flex fixed bottom-0 mb-10 ml-3 hover:text-yellow-500 cursor-pointer">
+            <li onClick={handleDelete}>탈퇴하기</li>
+          </ul>
         </ul>
       </div>
 
