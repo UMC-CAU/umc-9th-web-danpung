@@ -1,25 +1,25 @@
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { XCircle } from "lucide-react";
-import { createLp } from "../api/LpApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { XCircle } from 'lucide-react';
+import { createLp } from '../api/LpApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const FloatingButton = () => {
   const qc = useQueryClient();
-  const [LpName, setLpName] = useState("");
-  const [LpContent, setLpContent] = useState("");
-  const [LpTag, setLpTag] = useState("");
+  const [LpName, setLpName] = useState('');
+  const [LpContent, setLpContent] = useState('');
+  const [LpTag, setLpTag] = useState('');
   const [tags, setTags] = useState<string[]>([]);
 
-  const isAddLPEnabled = LpName.trim() !== "" && LpContent.trim() !== "";
-  const isAddTagEnabled = LpTag.trim() !== "";
+  const isAddLPEnabled = LpName.trim() !== '' && LpContent.trim() !== '';
+  const isAddTagEnabled = LpTag.trim() !== '';
 
   const [isopen, setIsopen] = useState(false);
   const handleClick = () => {
     if (isopen) {
-      setLpName("");
-      setLpContent("");
-      setLpTag("");
+      setLpName('');
+      setLpContent('');
+      setLpTag('');
       setTags([]);
     }
     setIsopen(!isopen);
@@ -27,33 +27,33 @@ const FloatingButton = () => {
 
   const handleAddTag = () => {
     const newTag = LpTag.trim();
-    if (newTag === "" || tags.includes(newTag)) {
-      setLpTag("");
+    if (newTag === '' || tags.includes(newTag)) {
+      setLpTag('');
       return;
     }
     setTags([...tags, newTag]);
-    setLpTag("");
+    setLpTag('');
   };
 
   const handleRemoveTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
   };
   const create = useMutation({
-    mutationKey: ["createLp"],
+    mutationKey: ['createLp'],
     mutationFn: createLp,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["lps"] });
+      qc.invalidateQueries({ queryKey: ['lps'] });
       setIsopen(false);
-      alert("Lp 추가 완료!");
+      alert('Lp 추가 완료!');
     },
     onError: () => {
-      alert("Lp 추가에 실패했습니다. 다시 시도해 주세요.");
+      alert('Lp 추가에 실패했습니다. 다시 시도해 주세요.');
       setIsopen(false);
     },
     onSettled: () => {
-      setLpName("");
-      setLpContent("");
-      setLpTag("");
+      setLpName('');
+      setLpContent('');
+      setLpTag('');
       setTags([]);
     },
   });
@@ -112,8 +112,8 @@ const FloatingButton = () => {
               <button
                 className={`w-16 rounded-sm p-2 text-white cursor-pointer ${
                   isAddTagEnabled
-                    ? "bg-yellow-500"
-                    : "bg-gray-400 cursor-not-allowed"
+                    ? 'bg-yellow-500'
+                    : 'bg-gray-400 cursor-not-allowed'
                 }`}
                 disabled={!isAddTagEnabled}
                 onClick={handleAddTag}
@@ -141,15 +141,15 @@ const FloatingButton = () => {
             <button
               className={`w-60 p-2 rounded text-white cursor-pointer ${
                 isAddLPEnabled
-                  ? "bg-yellow-500"
-                  : "bg-gray-400 cursor-not-allowed"
+                  ? 'bg-yellow-500'
+                  : 'bg-gray-400 cursor-not-allowed'
               }`}
               onClick={() => {
                 if (!isAddLPEnabled) return;
                 create.mutate({
                   title: LpName.trim(),
                   content: LpContent.trim(),
-                  thumbnail: "",
+                  thumbnail: '',
                   tags,
                   published: true,
                 });

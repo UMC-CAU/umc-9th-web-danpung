@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { logout as logoutApi } from "../api/auth";
-import { useToken } from "../Context/TokenContext";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { logout as logoutApi } from '../api/auth';
+import { useToken } from '../Context/TokenContext';
 
 export const useLogout = () => {
   const navigate = useNavigate();
@@ -18,10 +18,10 @@ export const useLogout = () => {
       qc.clear();
 
       // 3. 홈으로 이동
-      navigate("/");
+      navigate('/');
     },
     onError: () => {
-      alert("로그아웃 실패");
+      alert('로그아웃 실패');
     },
   });
 };
