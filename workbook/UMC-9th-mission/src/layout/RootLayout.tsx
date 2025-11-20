@@ -4,13 +4,18 @@ import Navbar from '../components/Navbar';
 import SideBar from '../components/SideBar';
 import FloatingButton from '../components/FloatingButton';
 import DeleteUser from '../components/DeleteUser';
-
+import { Menu } from 'lucide-react';
+import { useSidebar } from '../hooks/useSidebar';
 const RootLayout = () => {
-  const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
+  const { isOpen, open, close, toggle } = useSidebar(false);
   const [isMdUp, setIsMdUp] = useState(window.innerWidth >= 768);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [isDelete, setIsDelete] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+  }, [isOpen]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,22 +27,26 @@ const RootLayout = () => {
 
   return (
     <div className="flex">
-      <SideBar
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        isDelete={isDelete}
-        setIsDelete={setIsDelete}
-      />
+      {!isOpen && (
+        <button
+          onClick={() => open()}
+          className="fixed top-20 left-4 text-black z-100"
+        >
+          <Menu size={24} />
+        </button>
+      )}
+
+      <SideBar isOpen={isOpen} closeSidebar={close} />
 
       {isDelete && <DeleteUser isDelete={isDelete} setIsDelete={setIsDelete} />}
 
       <div
-        className={`flex-1 transition-all duration-300 ${
+        className={`flex-1 transition-all duration-500 ${
           isOpen && isMdUp ? 'md:ml-64' : 'md:ml-0'
         }`}
       >
         <Navbar
-          sidebarOpen={isOpen && isMdUp}
+          sidebarOpen={isOpen}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />

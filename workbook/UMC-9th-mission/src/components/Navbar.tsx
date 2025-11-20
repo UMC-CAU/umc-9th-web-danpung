@@ -35,9 +35,10 @@ const Navbar = ({ sidebarOpen, searchTerm, setSearchTerm }: NavbarProps) => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 h-16 bg-white shadow-md flex justify-between items-center px-8 font-bold z-50 transition-all duration-300 ${
-        sidebarOpen ? 'md:ml-64' : 'md:ml-0'
-      }`}
+      className={`fixed top-0 left-0 right-0 h-16 bg-white shadow-md flex justify-between items-center px-8 font-bold 
+              transition-all duration-300 
+              z-20
+              ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}
     >
       <NavLink to="/" className="text-black text-lg">
         돌돌돌돌 LP판
