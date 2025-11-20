@@ -1,18 +1,18 @@
-import { editUserMe, fetchUserMe } from "../api/LpApi";
-import type { IUserMe } from "../types/LP";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Error from "../components/Error";
-import dayjs from "dayjs";
-import { useState } from "react";
-import { Check, Edit2 } from "lucide-react";
-import { useToken } from "../Context/TokenContext";
+import { editUserMe, fetchUserMe } from '../api/LpApi';
+import type { IUserMe } from '../types/LP';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Error from '../components/Error';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { Check, Edit2 } from 'lucide-react';
+import { useToken } from '../Context/TokenContext';
 
 const UsermePage = () => {
   const { setUserMe } = useToken();
   const [isEdit, setIsEdit] = useState(false);
-  const [editingName, setEditingName] = useState("");
-  const [editingBio, setEditingBio] = useState("");
-  const [editingAvatar, setEditingAvatar] = useState("");
+  const [editingName, setEditingName] = useState('');
+  const [editingBio, setEditingBio] = useState('');
+  const [editingAvatar, setEditingAvatar] = useState('');
   const qc = useQueryClient();
 
   const updateUserMe = useMutation({
@@ -21,17 +21,17 @@ const UsermePage = () => {
     },
 
     onMutate: async (newUser: any) => {
-      await qc.cancelQueries({ queryKey: ["MyInfo"] });
-      const cached = qc.getQueryData<IUserMe>(["MyInfo"]);
+      await qc.cancelQueries({ queryKey: ['MyInfo'] });
+      const cached = qc.getQueryData<IUserMe>(['MyInfo']);
       const previousUser =
-        cached ?? (typeof data !== "undefined" ? data : null);
+        cached ?? (typeof data !== 'undefined' ? data : null);
 
       const optimisticUser = {
         ...((previousUser as IUserMe) ?? {}),
         ...newUser,
       } as IUserMe;
 
-      qc.setQueryData<IUserMe>(["MyInfo"], optimisticUser);
+      qc.setQueryData<IUserMe>(['MyInfo'], optimisticUser);
 
       try {
         setUserMe(optimisticUser);
@@ -47,35 +47,35 @@ const UsermePage = () => {
     onError: (_error, _variables, context) => {
       setIsEdit(false);
       if (context?.previousUser) {
-        qc.setQueryData(["MyInfo"], context.previousUser);
+        qc.setQueryData(['MyInfo'], context.previousUser);
         try {
           setUserMe(context.previousUser as IUserMe);
         } catch {
           //무시
         }
       } else {
-        qc.invalidateQueries({ queryKey: ["MyInfo"] });
+        qc.invalidateQueries({ queryKey: ['MyInfo'] });
       }
 
-      alert("정보 수정 오류");
+      alert('정보 수정 오류');
     },
 
     onSuccess: (updatedUserMe: IUserMe) => {
-      qc.invalidateQueries({ queryKey: ["MyInfo"] });
+      qc.invalidateQueries({ queryKey: ['MyInfo'] });
       setUserMe(updatedUserMe);
 
-      setEditingName("");
-      setEditingBio("");
+      setEditingName('');
+      setEditingBio('');
       setIsEdit(false);
     },
 
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["MyInfo"] });
+      qc.invalidateQueries({ queryKey: ['MyInfo'] });
     },
   });
 
   const { data, isLoading, isError } = useQuery<IUserMe>({
-    queryKey: ["MyInfo"],
+    queryKey: ['MyInfo'],
     queryFn: fetchUserMe,
     staleTime: 1000 * 60 * 5,
     retry: 1,
@@ -91,7 +91,7 @@ const UsermePage = () => {
         onClick={() => {
           if (isEdit) {
             if (!editingName.trim()) {
-              alert("이름을 작성해주세요!");
+              alert('이름을 작성해주세요!');
               return;
             }
 
@@ -103,9 +103,9 @@ const UsermePage = () => {
 
             updateUserMe.mutate(payload);
           } else {
-            setEditingName(data?.name ?? "");
-            setEditingBio(data?.bio ?? "");
-            setEditingAvatar(data?.avatar ?? "");
+            setEditingName(data?.name ?? '');
+            setEditingBio(data?.bio ?? '');
+            setEditingAvatar(data?.avatar ?? '');
             setIsEdit(true);
           }
         }}
@@ -120,7 +120,7 @@ const UsermePage = () => {
         </label>
       ) : (
         <img
-          src={data?.avatar || "https://placehold.co/40x40?text=No+Img"}
+          src={data?.avatar || 'https://placehold.co/40x40?text=No+Img'}
           alt={data?.name}
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -148,16 +148,16 @@ const UsermePage = () => {
             className="w-40 border rounded border-gray-400 box-border px-2 py-1 focus:border-yellow-500 outline-none pr-10"
           />
         ) : (
-          <p>{data?.bio === "" ? "자기소개 없음" : data?.bio}</p>
+          <p>{data?.bio === '' ? '자기소개 없음' : data?.bio}</p>
         )}
       </div>
 
       <p>이메일 : {data?.email}</p>
       <p>
-        계정 생성일 :{" "}
+        계정 생성일 :{' '}
         {data?.createdAt
-          ? dayjs(data.createdAt).format("YYYY년 MM월 DD일")
-          : "-"}
+          ? dayjs(data.createdAt).format('YYYY년 MM월 DD일')
+          : '-'}
       </p>
     </div>
   );

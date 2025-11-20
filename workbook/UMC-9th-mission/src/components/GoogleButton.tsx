@@ -1,7 +1,7 @@
-import Logo from "../assets/googleLogo.png"; //구글 로고
+import Logo from '../assets/googleLogo.png'; //구글 로고
 const GoogleButton = () => {
   const handleGoogleButton = () => {
-    window.location.href = "http://localhost:8000/v1/auth/google/login";
+    window.location.href = 'http://localhost:8000/v1/auth/google/login';
   };
   return (
     <button

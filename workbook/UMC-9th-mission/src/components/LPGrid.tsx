@@ -1,5 +1,5 @@
-import type { LP } from "../types/LP";
-import { useNavigate } from "react-router-dom";
+import type { LP } from '../types/LP';
+import { useNavigate } from 'react-router-dom';
 
 interface LPGridProps {
   lps: LP[];
@@ -39,7 +39,11 @@ const LPGrid = ({
               className="group w-48 h-48 relative overflow-hidden rounded-lg shadow-md cursor-pointer transition-transform duration-300 hover:scale-105"
             >
               <img
-                src={lp.thumbnail}
+                src={
+                  lp.thumbnail
+                    ? lp.thumbnail
+                    : 'https://placehold.co/400x400?text=No+Img'
+                }
                 alt={lp.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />

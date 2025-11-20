@@ -1,18 +1,18 @@
-import { useState } from "react"; //회원가입 페이지
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
-import profile from "../assets/profile.webp";
-import { signUp } from "../api/auth";
-import GoogleButton from "../components/GoogleButton";
+import { useState } from 'react'; //회원가입 페이지
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
+import profile from '../assets/profile.webp';
+import { signUp } from '../api/auth';
+import GoogleButton from '../components/GoogleButton';
 const schema = z.object({
-  email: z.string().email({ message: "올바른 이메일 형식이 아닙니다." }),
-  password: z.string().min(6, { message: "비밀번호는 6자 이상이어야 합니다." }),
+  email: z.string().email({ message: '올바른 이메일 형식이 아닙니다.' }),
+  password: z.string().min(6, { message: '비밀번호는 6자 이상이어야 합니다.' }),
   confirmPassword: z
     .string()
-    .min(1, { message: "비밀번호를 다시 입력해주세요." }),
-  nickName: z.string().min(1, { message: "닉네임을 입력해주세요." }),
+    .min(1, { message: '비밀번호를 다시 입력해주세요.' }),
+  nickName: z.string().min(1, { message: '닉네임을 입력해주세요.' }),
   bio: z.string().optional(),
   avatar: z.string().optional(),
 });
@@ -32,13 +32,13 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-    mode: "onChange",
+    mode: 'onChange',
   });
 
-  const email = watch("email");
-  const password = watch("password");
-  const confirmPassword = watch("confirmPassword");
-  const nickName = watch("nickName");
+  const email = watch('email');
+  const password = watch('password');
+  const confirmPassword = watch('confirmPassword');
+  const nickName = watch('nickName');
   const matchError = confirmPassword && password !== confirmPassword;
 
   const onSubmit = async (formData: FormFields) => {
@@ -50,12 +50,12 @@ const SignUpPage = () => {
         bio: formData.bio,
         avatar: formData.avatar,
       });
-      console.log("회원가입 성공:,", result);
-      alert("회원가입 성공");
-      navigate("/");
+      console.log('회원가입 성공:,', result);
+      alert('회원가입 성공');
+      navigate('/');
     } catch (error: any) {
-      console.log("회원가입 실패:", error.response?.data || error.message);
-      alert("회원가입 실패");
+      console.log('회원가입 실패:', error.response?.data || error.message);
+      alert('회원가입 실패');
     }
   };
 
@@ -81,7 +81,7 @@ const SignUpPage = () => {
         <div className="flex items-center justify-center w-full">
           <button
             type="button"
-            onClick={() => (step === 1 ? navigate("/") : setStep(step - 1))}
+            onClick={() => (step === 1 ? navigate('/') : setStep(step - 1))}
             className="absolute left-4 font-bold text-xl"
           >
             &lt;
@@ -92,7 +92,7 @@ const SignUpPage = () => {
         {step === 1 && (
           <div className="flex flex-col items-center">
             <input
-              {...register("email")}
+              {...register('email')}
               placeholder="이메일을 입력하세요"
               className="w-60 border rounded border-gray-400 box-border px-2 py-2 mb-3 focus:border-green-500 outline-none"
             />
@@ -103,8 +103,8 @@ const SignUpPage = () => {
               type="submit"
               className={`border rounded w-60 h-8 text-white transition ${
                 !email || errors.email
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-700"
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-700'
               }`}
             >
               다음
@@ -120,8 +120,8 @@ const SignUpPage = () => {
 
             <div className="relative w-60">
               <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="비밀번호를 입력하세요"
                 className="w-full border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
               />
@@ -130,14 +130,14 @@ const SignUpPage = () => {
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
               >
-                {showPassword ? "🕶️" : "👓"}
+                {showPassword ? '🕶️' : '👓'}
               </button>
             </div>
 
             <div className="relative w-60">
               <input
-                {...register("confirmPassword")}
-                type={showConfirmPassword ? "text" : "password"}
+                {...register('confirmPassword')}
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="비밀번호를 다시 입력하세요"
                 className="w-full border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none pr-10"
               />
@@ -146,7 +146,7 @@ const SignUpPage = () => {
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
               >
-                {showConfirmPassword ? "🕶️" : "👓"}
+                {showConfirmPassword ? '🕶️' : '👓'}
               </button>
             </div>
 
@@ -171,8 +171,8 @@ const SignUpPage = () => {
                 errors.confirmPassword ||
                 matchError ||
                 !password
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-700"
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-700'
               }`}
             >
               다음
@@ -188,7 +188,7 @@ const SignUpPage = () => {
               className="w-20 h-20 rounded-full object-cover mb-2"
             />
             <input
-              {...register("nickName")}
+              {...register('nickName')}
               placeholder="닉네임을 입력하세요"
               className="w-60 border rounded border-gray-400 box-border px-2 py-2 focus:border-green-500 outline-none"
             />
@@ -200,8 +200,8 @@ const SignUpPage = () => {
               type="submit"
               className={`border rounded w-60 h-8 text-white transition ${
                 !nickName || errors.nickName
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-700"
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-700'
               }`}
             >
               회원가입 완료

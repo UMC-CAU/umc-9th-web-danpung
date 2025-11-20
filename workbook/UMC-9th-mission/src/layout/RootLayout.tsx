@@ -1,46 +1,55 @@
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import SideBar from "../components/SideBar";
-import FloatingButton from "../components/FloatingButton";
-import DeleteUser from "../components/DeleteUser";
+import { useState, useEffect } from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import SideBar from '../components/SideBar';
+import FloatingButton from '../components/FloatingButton';
+import DeleteUser from '../components/DeleteUser';
+import { Menu } from 'lucide-react';
+import { useSidebar } from '../hooks/useSidebar';
 const RootLayout = () => {
-  const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
+  const { isOpen, open, close, toggle } = useSidebar(false);
   const [isMdUp, setIsMdUp] = useState(window.innerWidth >= 768);
-  const [searchTerm, setSearchTerm] = useState(""); // 검색어 상태
+  const [searchTerm, setSearchTerm] = useState('');
+
   const [isDelete, setIsDelete] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+  }, [isOpen]);
+
   useEffect(() => {
     const handleResize = () => {
-      const mdUp = window.innerWidth >= 768;
-      setIsMdUp(mdUp);
-      if (mdUp) setIsOpen(true);
-      else setIsOpen(false);
+      setIsMdUp(window.innerWidth >= 768);
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
     <div className="flex">
-      <SideBar
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        isDelete={isDelete}
-        setIsDelete={setIsDelete}
-      />
+      {!isOpen && (
+        <button
+          onClick={() => open()}
+          className="fixed top-20 left-4 text-black z-100"
+        >
+          <Menu size={24} />
+        </button>
+      )}
+
+      <SideBar isOpen={isOpen} closeSidebar={close} />
+
       {isDelete && <DeleteUser isDelete={isDelete} setIsDelete={setIsDelete} />}
 
       <div
-        className={`flex-1 transition-all duration-300 ${
-          isOpen && isMdUp ? "md:ml-64" : "md:ml-0"
+        className={`flex-1 transition-all duration-500 ${
+          isOpen && isMdUp ? 'md:ml-64' : 'md:ml-0'
         }`}
       >
         <Navbar
-          sidebarOpen={isOpen && isMdUp}
+          sidebarOpen={isOpen}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
-
         <div className="p-6 mt-16">
           <Outlet context={{ searchTerm, setSearchTerm }} />
         </div>

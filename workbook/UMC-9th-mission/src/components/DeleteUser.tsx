@@ -1,8 +1,8 @@
-import { X } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteUser } from "../api/auth";
-import { useNavigate } from "react-router-dom";
-import { useToken } from "../Context/TokenContext";
+import { X } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteUser } from '../api/auth';
+import { useNavigate } from 'react-router-dom';
+import { useToken } from '../Context/TokenContext';
 interface DeleteUserProps {
   isDelete: boolean;
   setIsDelete: (value: boolean) => void;
@@ -17,13 +17,13 @@ const DeleteUser = ({ isDelete, setIsDelete }: DeleteUserProps) => {
   const deleteUserMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
-      alert("회원탈퇴 완료!");
+      alert('회원탈퇴 완료!');
       logout();
       qc.invalidateQueries();
-      navigate("/");
+      navigate('/');
     },
     onError: () => {
-      alert("회원탈퇴 중 에러가 발생하였습니다. 다시 시도해 주세요.");
+      alert('회원탈퇴 중 에러가 발생하였습니다. 다시 시도해 주세요.');
     },
     onSettled: () => {
       setIsDelete(false);

@@ -2,27 +2,33 @@ import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
-} from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import SortButtons from "./SortButtons";
-import dayjs from "dayjs";
-import { useToken } from "../Context/TokenContext";
+} from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import SortButtons from './SortButtons';
+import dayjs from 'dayjs';
+import { useToken } from '../Context/TokenContext';
 import {
   fetchComments,
   postComment,
   deleteComment,
   editComment,
-} from "../api/LpApi";
-import { Edit, Trash2, MoreVertical } from "lucide-react";
-
+} from '../api/LpApi';
+import { Edit, Trash2, MoreVertical } from 'lucide-react';
+import { useThrottleFn } from '../hooks/useThrottingFn';
+import CommentSkeletonGrid from './CommentSkeleton';
 export default function InfiniteComments({ lpId }: { lpId: number }) {
   const { userMe } = useToken();
   const [showmenu, setShowmenu] = useState<number | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
-  const [editingContent, setEditingContent] = useState("");
+  const [editingContent, setEditingContent] = useState('');
   const qc = useQueryClient();
-  const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const [commentInput, setCommentInput] = useState("");
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+  const [commentInput, setCommentInput] = useState('');
+  const handleScrollFn = useThrottleFn(() => {
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
+    }
+  }, 2000);
 
   const toggleMenu = (commentid: number) => {
     if (showmenu === commentid) {
@@ -34,39 +40,39 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
   };
 
   const handleDeleteComment = useMutation({
-    mutationKey: ["deleteComment"],
+    mutationKey: ['deleteComment'],
     mutationFn: deleteComment,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
+      qc.invalidateQueries({ queryKey: ['comments', lpId, order] });
     },
     onError: () => {
-      alert("댓글 삭제 실패");
+      alert('댓글 삭제 실패');
     },
   });
 
   const handleEditComment = useMutation({
-    mutationKey: ["editComment"],
+    mutationKey: ['editComment'],
     mutationFn: editComment,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
+      qc.invalidateQueries({ queryKey: ['comments', lpId, order] });
       setEditingCommentId(null);
       setShowmenu(null);
     },
     onError: () => {
-      alert("댓글 수정 실패");
+      alert('댓글 수정 실패');
     },
   });
 
   const createComment = useMutation({
-    mutationKey: ["createComment"],
+    mutationKey: ['createComment'],
     mutationFn: postComment,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["comments", lpId, order] });
-      setCommentInput("");
+      qc.invalidateQueries({ queryKey: ['comments', lpId, order] });
+      setCommentInput('');
     },
     onError: () => {
-      alert("댓글 작성 실패");
-      setCommentInput("");
+      alert('댓글 작성 실패');
+      setCommentInput('');
     },
   });
 
@@ -79,29 +85,36 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["comments", lpId, order],
+    queryKey: ['comments', lpId, order],
     queryFn: ({ pageParam = 0 }) => fetchComments({ lpId, pageParam, order }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,
     enabled: !!lpId,
+    staleTime: 1000 * 30, // 30초 동안 캐시 유지
+    gcTime: 1000 * 60 * 5, // 5분 동안 캐시 보관
   });
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
     if (!sentinelRef.current) return;
-    const observer = new IntersectionObserver((entries) => {
-      const first = entries[0];
-      if (first.isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        handleScrollFn();
+        observer.unobserve(sentinelRef.current!);
+        setTimeout(() => {
+          if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+          }
+        }, 1000);
       }
     });
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [handleScrollFn]);
 
-  if (isLoading) return <p className="text-gray-400">댓글 불러오는 중...</p>;
+  if (isLoading) return <CommentSkeletonGrid count={6} />;
   if (isError)
     return (
       <div className="text-center text-red-500">
@@ -129,7 +142,7 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
           value={commentInput}
           onChange={(e) => setCommentInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && commentInput.trim()) {
+            if (e.key === 'Enter' && commentInput.trim()) {
               createComment.mutate({
                 lpid: lpId,
                 content: commentInput.trim(),
@@ -141,15 +154,15 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
           disabled={createComment.isPending}
           className={`px-4 py-2 rounded-lg text-white transition ${
             createComment.isPending
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-yellow-400 hover:bg-yellow-500"
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-yellow-400 hover:bg-yellow-500'
           }`}
           onClick={() => {
             if (!commentInput.trim()) return;
             createComment.mutate({ lpid: lpId, content: commentInput.trim() });
           }}
         >
-          {createComment.isPending ? "등록 중..." : "등록"}
+          {createComment.isPending ? '등록 중...' : '등록'}
         </button>
       </div>
 
@@ -160,7 +173,7 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
               <div className="flex items-center gap-2">
                 <img
                   src={
-                    c.author.avatar || "https://placehold.co/40x40?text=No+Img"
+                    c.author.avatar || 'https://placehold.co/40x40?text=No+Img'
                   }
                   alt={c.author.name}
                   className="w-10 h-10 rounded-full object-cover"
@@ -195,7 +208,7 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
                     <button
                       className="text-sm text-red-500 cursor-pointer"
                       onClick={() => {
-                        if (confirm("댓글을 삭제하시겠습니까?"))
+                        if (confirm('댓글을 삭제하시겠습니까?'))
                           handleDeleteComment.mutate({
                             lpid: lpId,
                             commentid: c.id,
@@ -217,7 +230,7 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
                   onChange={(e) => setEditingContent(e.target.value)}
                   className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && editingContent.trim()) {
+                    if (e.key === 'Enter' && editingContent.trim()) {
                       handleEditComment.mutate({
                         lpid: lpId,
                         commentid: c.id,
@@ -256,11 +269,13 @@ export default function InfiniteComments({ lpId }: { lpId: number }) {
 
       <div ref={sentinelRef} className="h-4" />
       <div className="py-2 text-center text-gray-500">
-        {isFetchingNextPage
-          ? "불러오는 중..."
-          : hasNextPage
-          ? "스크롤하면 더 불러와요"
-          : "모든 댓글을 불러왔습니다"}
+        {isFetchingNextPage ? (
+          <CommentSkeletonGrid count={3} />
+        ) : hasNextPage ? (
+          '스크롤하면 더 불러와요'
+        ) : (
+          '모든 댓글을 불러왔습니다'
+        )}
       </div>
     </div>
   );

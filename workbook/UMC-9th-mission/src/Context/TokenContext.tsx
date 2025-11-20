@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
-import type { IUserMe } from "../types/LP";
-import api from "../api/axiosInstance";
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import type { IUserMe } from '../types/LP';
+import api from '../api/axiosInstance';
 
 interface TokenContextType {
   token: string | null;
@@ -15,20 +15,20 @@ const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
 export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(
-    localStorage.getItem("accessToken")
+    localStorage.getItem('accessToken')
   );
   const [userMe, setUserMe] = useState<IUserMe | null>(null);
   const isLoggingOut = useRef(false);
 
   const login = (newToken: string) => {
-    localStorage.setItem("accessToken", newToken);
+    localStorage.setItem('accessToken', newToken);
     setToken(newToken);
   };
 
   const logout = () => {
     isLoggingOut.current = true;
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setToken(null);
     setUserMe(null);
   };
@@ -36,7 +36,7 @@ export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (token) {
       api
-        .get("/v1/users/me")
+        .get('/v1/users/me')
         .then((res) => {
           if (!isLoggingOut.current) setUserMe(res.data.data);
         })
@@ -57,6 +57,6 @@ export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useToken = () => {
   const context = useContext(TokenContext);
-  if (!context) throw new Error("useToken must be used within a TokenProvider");
+  if (!context) throw new Error('useToken must be used within a TokenProvider');
   return context;
 };
