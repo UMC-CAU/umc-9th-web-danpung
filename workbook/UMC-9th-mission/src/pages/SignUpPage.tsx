@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"; //회원가입 페이지
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
