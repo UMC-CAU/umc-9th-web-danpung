@@ -1,15 +1,17 @@
-import { useDispatch } from "react-redux";
-import { closeModal } from "../features/modalSlice";
-import { clearCart } from "../features/cartSlice";
-
+// import { useDispatch } from "react-redux";
+// import { closeModal } from "../features/modalSlice";
+// import { clearCart } from "../features/cartSlice";
+import { useModal } from "../hooks/useModal";
+import { useCartStore } from "../hooks/useCartStore";
 const Modal = () => {
-  const dispatch = useDispatch();
-
+  // const dispatch = useDispatch();
+  const { closeModal } = useModal();
+  const { clearCart } = useCartStore();
   return (
     <>
       <div
         className="fixed inset-0 z-40 flex justify-center items-center"
-        onClick={() => dispatch(closeModal())}
+        onClick={() => closeModal()}
       >
         <div className="absolute inset-0 bg-gray-300/40 backdrop-blur-sm"></div>
         <section
@@ -20,15 +22,15 @@ const Modal = () => {
           <div className="flex flex-row gap-10">
             <button
               onClick={() => {
-                dispatch(clearCart());
-                dispatch(closeModal());
+                clearCart();
+                closeModal();
               }}
               className="w-15 h-10 bg-red-500 rounded-xl font-bold text-lg text-white"
             >
               네
             </button>
             <button
-              onClick={() => dispatch(closeModal())}
+              onClick={() => closeModal()}
               className="w-15 h-10 bg-gray-300 rounded-xl font-bold text-lg text-black"
             >
               아니요

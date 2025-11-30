@@ -1,14 +1,17 @@
 import RouteLayout from "../layout/RouteLayout";
 import CountButton from "../components/CountButton";
-import { useDispatch, useSelector } from "react-redux";
-import { openModal } from "../features/modalSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import { openModal } from "../features/modalSlice";
 import Modal from "../components/Modal";
+import { useModal } from "../hooks/useModal";
+import { useCartStore } from "../hooks/useCartStore";
 const CartPage = () => {
-  const cartItems = useSelector((state: any) => state.cart.items);
-  const total = useSelector((state: any) => state.cart.total);
-  const dispatch = useDispatch();
-  const isModalOpen = useSelector((state: any) => state.modal.isOpen);
-
+  // const cartItems = useSelector((state: any) => state.cart.items);
+  // const total = useSelector((state: any) => state.cart.total);
+  // const dispatch = useDispatch();
+  // const isModalOpen = useSelector((state: any) => state.modal.isOpen);
+  const { isOpen, openModal } = useModal();
+  const { total, cartItems } = useCartStore();
   return (
     <div>
       <RouteLayout />
@@ -25,7 +28,7 @@ const CartPage = () => {
             </div>
 
             <div className="flex flex-col items-center bg-gray-100 rounded-xl p-3 gap-y-1">
-              <p className="font-bold">{item.price * item.amount}원</p>
+              <p className="font-bold">{Number(item.price) * item.amount}원</p>
               <span>1개 : {item.price}원</span>
             </div>
             <div className="flex w-24 justify-center items-center">
@@ -38,7 +41,7 @@ const CartPage = () => {
         <div className=" flex flex-col items-center gap-2">
           <button
             onClick={() => {
-              dispatch(openModal());
+              openModal();
             }}
             className="bg-red-500 text-white px-6 py-2 rounded-full cursor-pointer shadow-lg"
           >
@@ -47,7 +50,7 @@ const CartPage = () => {
           <h1 className="text-2xl font-bold">총 합계: {total}원</h1>
         </div>
       </footer>
-      {isModalOpen && <Modal />}
+      {isOpen && <Modal />}
     </div>
   );
 };
