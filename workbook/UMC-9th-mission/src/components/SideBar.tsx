@@ -1,84 +1,27 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 interface SideBarProps {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
-  isDelete: boolean;
-  setIsDelete: (value: boolean) => void;
+  closeSidebar: () => void;
 }
 
-const SideBar = ({
-  isOpen,
-  setIsOpen,
-  isDelete,
-  setIsDelete,
-}: SideBarProps) => {
-  const navigate = useNavigate();
-
-  const handleDelete = () => {
-    setIsDelete(!isDelete);
-  };
-
-  const [isMdUp, setIsMdUp] = useState(window.innerWidth >= 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMdUp(window.innerWidth >= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const sidebarVisible = isMdUp ? true : isOpen;
-  const handleClick = () => setIsOpen(!isOpen);
-
+const SideBar = ({ isOpen, closeSidebar }: SideBarProps) => {
   return (
     <div>
-      {!isMdUp && (
-        <button
-          onClick={handleClick}
-          className={`fixed top-4 left-4 z-50 p-2 shadow rounded ${
-            isOpen ? "bg-yellow-400 hover:bg-yellow-500" : "bg-white"
-          }`}
+      {isOpen && (
+        <div
+          onClick={closeSidebar}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         >
-          <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-            <path
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="4"
-              d="M4 8h24M4 16h24M4 24h24"
-            />
-          </svg>
-        </button>
-      )}
-
-      <div
-        className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-white z-40 transition-transform duration-300 ${
-          sidebarVisible ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <ul className="flex flex-col gap-4 p-6 pt-32">
-          <li
-            className="cursor-pointer hover:text-yellow-500"
-            onClick={() => navigate("/search")}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-0 left-0 h-full w-64 bg-yellow-800 text-white p-4
+                       transition-transform transform z-40"
           >
-            검색
-          </li>
-          <li
-            className="cursor-pointer hover:text-yellow-500"
-            onClick={() => navigate("/v1/users/me")}
-          >
-            내 정보
-          </li>
-          <ul className="flex fixed bottom-0 mb-10 ml-3 hover:text-yellow-500 cursor-pointer">
-            <li onClick={handleDelete}>탈퇴하기</li>
-          </ul>
-        </ul>
-      </div>
-
-      {!isMdUp && isOpen && (
-        <div onClick={handleClick} className="fixed inset-0 bg-black/50 z-30" />
+            <ul className="flex flex-col gap-y-10">
+              <li>검색</li>
+              <li>내정보</li>
+            </ul>
+          </div>
+        </div>
       )}
     </div>
   );

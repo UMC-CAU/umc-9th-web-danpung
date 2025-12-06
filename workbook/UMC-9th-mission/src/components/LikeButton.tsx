@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateLikes, deleteLikes } from "../api/LpApi";
-import { useToken } from "../Context/TokenContext";
-import { Heart } from "lucide-react";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateLikes, deleteLikes } from '../api/LpApi';
+import { useToken } from '../Context/TokenContext';
+import { Heart } from 'lucide-react';
 
 interface LikeButtonProps {
   lpid: number;
@@ -19,11 +19,11 @@ const LikeButton = ({ lpid, likes }: LikeButtonProps) => {
       willLike ? updateLikes(lpid) : deleteLikes(lpid),
 
     onMutate: async (willLike) => {
-      await qc.cancelQueries({ queryKey: ["lp", String(lpid)] });
+      await qc.cancelQueries({ queryKey: ['lp', String(lpid)] });
 
-      const previous = qc.getQueryData(["lp", String(lpid)]);
+      const previous = qc.getQueryData(['lp', String(lpid)]);
 
-      qc.setQueryData(["lp", String(lpid)], (old: any) => {
+      qc.setQueryData(['lp', String(lpid)], (old: any) => {
         if (!old) return old;
         const data = old.data;
         const currentLikes = data.likes || [];
@@ -54,12 +54,12 @@ const LikeButton = ({ lpid, likes }: LikeButtonProps) => {
 
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        qc.setQueryData(["lp", String(lpid)], context.previous);
+        qc.setQueryData(['lp', String(lpid)], context.previous);
       }
     },
 
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["lp", String(lpid)] });
+      qc.invalidateQueries({ queryKey: ['lp', String(lpid)] });
     },
   });
 
@@ -67,7 +67,7 @@ const LikeButton = ({ lpid, likes }: LikeButtonProps) => {
     <button onClick={() => mutation.mutate(!isUserLiked)}>
       <Heart
         className={`w-6 h-6 cursor-pointer transition-all ${
-          isUserLiked ? "fill-red-500 text-red-500 scale-110" : "fill-none"
+          isUserLiked ? 'fill-red-500 text-red-500 scale-110' : 'fill-none'
         }`}
       />
     </button>

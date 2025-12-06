@@ -1,12 +1,7 @@
-import InfiniteAuto from "../components/InfiniteAuto";
-import Finding from "../components/Finding";
-const HomePage = () => {
-  //홈페이지
-  return (
-    <div>
-      <InfiniteAuto />
-    </div>
-  );
-};
+import { useOutletContext } from 'react-router-dom';
+import Finding from '../components/Finding';
+export default function HomePage() {
+  const { searchTerm } = useOutletContext<{ searchTerm: string }>();
 
-export default HomePage;
+  return <Finding searchTerm={searchTerm} />;
+}

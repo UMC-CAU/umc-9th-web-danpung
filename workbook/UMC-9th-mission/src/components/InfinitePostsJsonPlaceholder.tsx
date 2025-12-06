@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 interface Post {
   id: number;
@@ -14,7 +14,7 @@ async function fetchPost({ pageParam = 1 }: { pageParam?: number }) {
   );
 
   if (!res.ok) {
-    throw new Error("네트워크 에러");
+    throw new Error('네트워크 에러');
   }
   return (await res.json()) as Post[];
 }
@@ -28,7 +28,7 @@ export default function InfinitePostsJsonPlaceholder() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["post", PAGE_SIZE],
+    queryKey: ['post', PAGE_SIZE],
     queryFn: ({ pageParam }) => fetchPost({ pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
@@ -57,14 +57,14 @@ export default function InfinitePostsJsonPlaceholder() {
       <div>
         {hasNextPage ? (
           <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-            {isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+            {isFetchingNextPage ? '불러오는 중...' : '더 보기'}
           </button>
         ) : (
           <span>마지막 페이지예요.</span>
         )}
       </div>
 
-      <div style={{ marginTop: 8, fontSize: 12, color: "#555" }}>
+      <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
         상태: {status} / 다음 페이지 가능: {String(!!hasNextPage)}
       </div>
     </div>

@@ -1,15 +1,15 @@
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import api from "../api/axiosInstance";
-import LpContent from "../components/LPMain";
-import LpComments from "../components/Comment";
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../api/axiosInstance';
+import LpContent from '../components/LPMain';
+import LpComments from '../components/Comment';
 
 const LpdetailPage = () => {
   const { id } = useParams<{ id: string }>();
 
   // 상세 정보 불러오기
   const { data, isPending, isError } = useQuery({
-    queryKey: ["lp", id],
+    queryKey: ['lp', id],
     queryFn: () => api.get(`/v1/lps/${id}`).then((res) => res.data),
     enabled: !!id, // id 없을 때 요청 방지
   });
