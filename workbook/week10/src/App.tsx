@@ -1,5 +1,4 @@
-import SearchForm from "./components/SearchForm";
-import HomePage from "./pages/homePage";
+import HomePage from "./pages/HomePage";
 const App = () => {
   return (
     <div>

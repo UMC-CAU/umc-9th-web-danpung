@@ -50,7 +50,9 @@ const MovieGrid = ({
 
                 <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 opacity-0 group-hover:opacity-100 transition">
                   <h3 className="text-sm font-bold">{movie.title}</h3>
-                  <p className="text-xs">평점: {movie.vote_average}</p>
+                  <p className="text-xs">
+                    평점: {movie.vote_average.toFixed(1)}
+                  </p>
                 </div>
               </div>
             ))}

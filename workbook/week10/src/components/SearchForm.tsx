@@ -4,7 +4,10 @@ import { useDebounce } from "../hooks/useDebounce";
 import { BiSolidCameraMovie } from "react-icons/bi";
 import { GrSettingsOption } from "react-icons/gr";
 import { GrLanguage } from "react-icons/gr";
+import SortButtons from "./SortButtons";
+import useSortStore from "../features/useSortStore";
 const SearchForm = () => {
+  const { order } = useSortStore();
   const {
     searchQuery,
     setSearchQuery,
@@ -19,7 +22,7 @@ const SearchForm = () => {
     setSearchQuery(debouncedValue);
   }, [debouncedValue, setSearchQuery]);
   return (
-    <div className="flex flex-col justify-center">
+    <div className="flex flex-col justify-center mt-5">
       <div className="flex flex-row justify-center gap-x-20">
         <form className="flex flex-col items-center">
           <span className="flex flex-row items-center gap-2 mb-2 text-xl font-bold  ">
@@ -30,7 +33,7 @@ const SearchForm = () => {
           <input
             type="text"
             placeholder="영화 제목을 입력하세요"
-            className="border px-2"
+            className="border border-blue-300 rounded-lg px-2"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
@@ -41,7 +44,7 @@ const SearchForm = () => {
             <GrSettingsOption />
             옵션
           </span>
-          <label className="flex flex-row gap-4 border px-2 cursor-pointer">
+          <label className="flex flex-row gap-4 border px-2 cursor-pointer border-blue-300 text-gray-500 rounded-lg">
             <input
               type="checkbox"
               checked={includeAdult}
@@ -52,19 +55,29 @@ const SearchForm = () => {
         </div>
       </div>
       <div className="flex flex-col justify-center items-center mt-4 px-2 w-fit mx-auto">
-        <span className="flex flex-row gap-3 items-center">
+        <span className="flex flex-row gap-1 items-center">
           <GrLanguage className="text-blue-500" />
           언어
         </span>
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="border p-3"
+          className="border border-blue-300 rounded-lg py-2 px-1"
         >
           <option value="en-US">English</option>
           <option value="ko-KR">한국어</option>
           <option value="ja-JP">日本語</option>
         </select>
+      </div>
+      <div className="flex justify-end mt-4 px-6 mr-20">
+        <div className="flex flex-col items-end relative">
+          <SortButtons />
+          {order === "rating" && (
+            <span className="text-gray-500 text-sm absolute top-full mt-1 right-0 whitespace-nowrap">
+              평점순은 조회수에 따른 가중치 부과
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

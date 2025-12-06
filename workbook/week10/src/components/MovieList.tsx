@@ -5,8 +5,11 @@ import type { TMovieResponse } from "../types/movieType";
 import MovieGrid from "./MovieGrid";
 import useMovieStore from "../features/useMovieStore";
 import { useThrottleFn } from "../hooks/useThrottle";
+import useSortStore from "../features/useSortStore";
 
 const MovieList = () => {
+  const { order } = useSortStore();
+
   const { includeAdult, language, searchQuery } = useMovieStore();
   const {
     data,
@@ -60,9 +63,32 @@ const MovieList = () => {
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [handleScrollFn]);
-  const allMovies = useMemo(() => {
-    return data?.pages.flatMap((page) => page.results) ?? [];
-  }, [data]);
+  const sortedMovies = useMemo(() => {
+    const movies = data?.pages.flatMap((page) => page.results) ?? [];
+
+    if (order === "popular") {
+      return [...movies].sort((a, b) => b.popularity - a.popularity);
+    }
+
+    if (order === "rating") {
+      return [...movies].sort((a, b) => {
+        const m = 200; // 최소 투표수(가중치의 영향도 조절)
+        const C = 6.5; // 전체 평균 평점(TMDB는 6~7 사이)
+
+        const weightedA =
+          (a.vote_count / (a.vote_count + m)) * a.vote_average +
+          (m / (a.vote_count + m)) * C;
+
+        const weightedB =
+          (b.vote_count / (b.vote_count + m)) * b.vote_average +
+          (m / (b.vote_count + m)) * C;
+
+        return weightedB - weightedA;
+      });
+    }
+
+    return movies;
+  }, [data, order]);
 
   if (searchQuery.trim() === "") {
     return (
@@ -92,7 +118,7 @@ const MovieList = () => {
   return (
     <div className="mt-16 p-6">
       <MovieGrid
-        movies={allMovies}
+        movies={sortedMovies}
         isLoading={false}
         bottomSkeletonCount={isFetchingNextPage ? 8 : 0}
       />
