@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Vite specific
+.vite/
+
+# Environment variables
+.env.local
+.env
+# Operating System and IDE specific files
+.DS_Store
+.vscode/
+
+# Log files
+*.log
+.vercel
