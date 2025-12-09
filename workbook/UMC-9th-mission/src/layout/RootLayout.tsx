@@ -7,7 +7,7 @@ import DeleteUser from '../components/DeleteUser';
 import { Menu } from 'lucide-react';
 import { useSidebar } from '../hooks/useSidebar';
 const RootLayout = () => {
-  const { isOpen, open, close, toggle } = useSidebar(false);
+  const { isOpen, open, close } = useSidebar(false);
   const [isMdUp, setIsMdUp] = useState(window.innerWidth >= 768);
   const [searchTerm, setSearchTerm] = useState('');
 
