@@ -12,7 +12,7 @@ const LPGrid = ({
   isLoading = false,
   bottomSkeletons = 0,
 }: LPGridProps) => {
-  const skeletons = Array.from({ length: 8 });
+  const skeletons = Array.from({ length: 10 });
   const bottomSkels = Array.from({ length: bottomSkeletons });
   const navigate = useNavigate();
 

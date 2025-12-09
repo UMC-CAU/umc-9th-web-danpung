@@ -71,11 +71,11 @@ export default function InfiniteLPGrid({ searchTerm }: { searchTerm: string }) {
 
   if (isError)
     return (
-      <div className="mt-16 p-6 text-center text-red-500">
+      <div className="flex flex-col gap-4 mt-16 p-6 text-center text-red-500">
         데이터를 가져오는 중 오류가 발생했습니다.
         <button
           onClick={() => refetch()}
-          className="mt-3 px-4 py-2 bg-yellow-400 text-white rounded"
+          className="mt-3 inline-block w-fit px-4 py-2 bg-yellow-400 text-white rounded mx-auto"
         >
           재시도
         </button>
